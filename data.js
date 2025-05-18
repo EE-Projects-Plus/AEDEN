@@ -1,5 +1,5 @@
-// JavaScript source code
-// JavaScript code to handle loading and showing content
+// ======= Loading Screen ========
+
 window.addEventListener('load', function () {
     const loadingScreen = document.getElementById('loading-screen');
     const logoAnimation = document.getElementById('logo-animation');
@@ -35,91 +35,101 @@ function updateTimer() {
     updateTimer();
 });
 
-//---------------------------------------------------------------------------------------------------//
+// === Character Section ===
+const characters = [
+  {
+    name: 'Kael the Riftborn',
+    image: 'media/kael.jpg',
+    description: 'A lost warrior from a collapsed timeline, wielding blades shaped by memory.',
+  },
+  {
+    name: 'Elyra of the Dust',
+    image: 'media/elyra.jpg',
+    description: 'Mystic scavenger who bends sandstorms and silence to her will.',
+  },
+  {
+    name: 'Vorr, Mindforged Titan',
+    image: 'media/vorr.jpg',
+    description: 'A biomechanical juggernaut animated by hive consciousness and ancient wrath.',
+  },
+];
 
-const cookieBox = document.querySelector(".cookie-popup"),
-    buttons = document.querySelectorAll("button");
+const container = document.getElementById('character-container');
+if (container) {
+  characters.forEach(char => {
+    const card = document.createElement('div');
+    card.className = 'character-card';
+    card.innerHTML = `
+      <img src="${char.image}" alt="${char.name}">
+      <h3>${char.name}</h3>
+      <p>${char.description}</p>
+    `;
+    container.appendChild(card);
+  });
+}
 
-//adds animation as the cookie prompt appears to the screen from the right
-const executeCodes = () => {
-    if (document.cookie.includes("codinglab")) return;
-    cookieBox.classList.add("show");
+// === Countdown Timer ===
+const countdown = document.getElementById('countdown');
+const releaseDate = new Date(Date.now() + (2 * 365 + 14) * 24 * 60 * 60 * 1000);
 
-    buttons.forEach((button) => {
-        button.addEventListener("click", () => {
-            cookieBox.classList.remove("show");
-            console.log("delete show");
+function updateCountdown() {
+  const now = new Date();
+  const diff = releaseDate - now;
 
-            //if "Accept" button has been pressed
-            if (button.id == "acceptBtn") {
-                //set cookies to last 1 month. 60 = 1minute, 60 = 1hour, 24 = 1day, 30 = 30days
-                document.cookie = "cookieBy= codinglab; max-age=" + 60 * 60 * 24 * 30;
-                document.cookie = "cookieBy= codinglab; max-age=" + 60 * 60 * 24 * 30;
-                console.log("done");
-            }
-        })
-    })
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  if (countdown) {
+    countdown.textContent = `Release in: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+  }
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// === Infinite Carousel ===
+const carousel = document.getElementById('carousel');
+if (carousel) {
+  // Prevent infinite cloning
+  if (!carousel.dataset.cloned) {
+    const imgs = carousel.querySelectorAll('img');
+    imgs.forEach(img => {
+      const clone = img.cloneNode(true);
+      carousel.appendChild(clone);
+    });
+    carousel.dataset.cloned = 'true';
+  }
+
+  function autoScroll() {
+    if (carousel.scrollLeft >= carousel.scrollWidth / 2) {
+      carousel.scrollLeft = 0;
+    } else {
+      carousel.scrollLeft += 1;
+    }
+  }
+
+  setInterval(autoScroll, 20);
+}
+
+// === Scroll Fade Animation ===
+const faders = document.querySelectorAll(
+  '.fade-left, .fade-right, .fade-up, .fade-down'
+);
+
+const appearOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
 };
 
-//executeCodes funstion will be called on webpage load
-window.addEventListener("load", executeCodes);
-
-
-
-// JavaScript to toggle navigation menu
-function toggleMenu() {
-    var x = document.getElementsByTagName("nav")[0];
-    if (x.style.display === "block") {
-        x.style.display = "none";
+const appearOnScroll = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('appear');
     } else {
-        x.style.display = "block";
+      entry.target.classList.remove('appear');
     }
-}
+  });
+}, appearOptions);
 
-//Java script to transition content on screen by scrolling down
-function reveal() {
-    var reveals = document.querySelectorAll(".reveal");
-
-    for (var i = 0; i < reveals.length; i++) {
-        var windowHeight = window.innerHeight;
-        var elementTop = reveals[i].getBoundingClientRect().top;
-        var elementVisible = 150;
-
-        if (elementTop < windowHeight - elementVisible) {
-            reveals[i].classList.add("active");
-        } else {
-            reveals[i].classList.remove("active");
-        }
-    }
-}
-
-window.addEventListener("scroll", reveal);
-
-
-function toggleDropdown() {
-    const dropdownContent = document.querySelector(".dropdown-content");
-    dropdownContent.classList.toggle("show");
-}
-
-
-// JavaScript to lazy load background images
-document.addEventListener("DOMContentLoaded", function () {
-    const sections = document.querySelectorAll(".section");
-    const options = {
-        threshold: 0 // Adjust this threshold as needed
-    };
-
-    const observer = new IntersectionObserver(function (entries, observer) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const bgImage = entry.target.getAttribute("data-bg-image");
-                entry.target.style.backgroundImage = `url('${bgImage}')`;
-                observer.unobserve(entry.target);
-            }
-        });
-    }, options);
-
-    sections.forEach(section => {
-        observer.observe(section);
-    });
-});
+faders.forEach(fader => appearOnScroll.observe(fader));
