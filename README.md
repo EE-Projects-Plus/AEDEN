@@ -1,2 +1,2 @@
 # AEDEN
-Store page Demo
+Game studio demo site
